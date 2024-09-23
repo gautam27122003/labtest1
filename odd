@@ -1,0 +1,43 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import butter,filtfilt
+np.random.seed(42)# to ensure that random vlues are genreated same evry time
+#generate 1440 values using normal dis mean = 75 standeviation=10
+pollution_data=np.random.normal(loc=150,scale=20,size=1440)
+def low_pass_filter(data,cutoff=0.1,fs=1,order=5):
+    nyquistrate=0.5*fs
+    normalcutoff=cutoff/nyquistrate
+    b,a=butter(order,normalcutoff,btype='low',analog=False)
+    y=filtfilt(b,a,data)
+    return y
+smooth_data=low_pass_filter(pollution_data)
+def hourlyavg(data):
+    y=np.mean(data.reshape(24,60),axis=1)
+    return y
+hourly_avg=hourlyavg(smooth_data)
+print("the hourly average is as follows:",hourly_avg)
+plt.figure(figsize=(12,6))
+minutes=np.arange(1440)#generates minutes from 0 to 1440
+# plt.plot(minutes,pollution_data,label='noisy data',color='red')
+# plt.plot(minutes,pollution_data,label='smooth data',color='green')
+
+#hours=np.arange(0,1440,60)
+# for i in range(0,len(hourly_avg)):
+#     if (hourly_avg[i]>=150):
+#         plt.scatter(hours,hourly_avg,label='hourly average>150',marker='o',color='orange')
+hourlyavg_150=[]
+for i inrange(0,len(hourly_avg)):
+    if(hourly_avg[i]>150):
+        hourlyavg_150.append(hourly_avg[i])
+hours=np.arange(len(hourlyavg_140))
+plt.scatter(hourlyavg_150,hours)
+        
+plt.scatter(hours,hourly_avg,label='hourly avg',marker='o',color='orange' )
+plt.plot(minutes,pollution_data,label='noisy data',color='red')
+plt.plot(minutes,pollution_data,label='smooth data',color='green')
+
+plt.legend()
+plt.xlabel("minutes")
+plt.ylabel("AQI redings")
+plt.title("Analyse air quality fluctuations in a high-traffic urban area over a 24-hour period.")
+plt.show()
